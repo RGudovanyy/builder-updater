@@ -69,7 +69,7 @@ public class ConfigManager {
 	}
 
 	public String getServer() {
-		if (isDeployable()) {
+		if (isDeployable() || isRestartable()) {
 			return this.properties.getProperty("weblogic.server");
 		}
 		return null;
