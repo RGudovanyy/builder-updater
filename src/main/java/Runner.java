@@ -1,4 +1,4 @@
 public interface Runner {
 
-	void run(String path);
+	void run(String path) throws Exception;
 }

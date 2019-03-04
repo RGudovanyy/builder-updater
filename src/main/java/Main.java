@@ -14,34 +14,33 @@ public class Main {
 		}
 		final ConfigManager configManager = new ConfigManager(args);
 
-		final WebDriver teamcityDriver = DriverManager.getHtmUnitDriver();
-		final Runner teamcityRunner = new TeamcityRunner(teamcityDriver, configManager.getProperties());
+		final Runner teamcityRunner = new RestTeamcityRunner(configManager.getProperties());
 
 		try {
-			// собираем
+			// build
 			if (configManager.isBuildable()) {
 				logger.info("Start building patch with TeamCity");
 				teamcityRunner.run(configManager.getBuildName());
 				logger.info("Patch was successfully builded");
 			}
-			// деплоим
+			// deploy
 			if (configManager.isDeployable() || configManager.isRestartable()) {
 				logger.info("Start termination of WebLogic server");
 				final WebDriver weblogicDriver = DriverManager.getHtmUnitDriver();
 				final Runner weblogicRunner = new WeblogicRunner(weblogicDriver, configManager.getProperties());
 				final String serverName = configManager.getServer();
-				// стопаем стенд
+				// stop stand
 				weblogicRunner.run(serverName);
 				logger.info("WebLogic server was successfully terminated");
 
 				if (!configManager.isRestartable()) {
-					// деплоим
+					// deploy
 					logger.info("Start deploying patch with TeamCity");
 					teamcityRunner.run(configManager.getDeployName());
 					logger.info("Patch was successfully deployed");
 				}
 
-				// запускаем стенд
+				// start stand
 				logger.info("Starting WebLogic server");
 				weblogicRunner.run(serverName);
 				logger.info("WebLogic server was successfully started");
@@ -50,8 +49,6 @@ public class Main {
 		} catch (Exception e) {
 			logger.error("An unexpected error occurred during program execution: \n {}", e);
 		}
-		// закрываем коннекты
-		teamcityDriver.close();
 		logger.info("Bye");
 	}
 }
